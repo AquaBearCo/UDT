@@ -1,3 +1,10 @@
+UDT Licensing
+
+UDT is copyrighted software and the copyright holder is the Board of Trustees of the University of Illinois. The current UDT version 4 is under the BSD-3-Clause license. All previous UDT versions were under the GNU Library/Lesser GPL (LGPL). Any conflicting license attributions found upstream for UDT v4 code are considered mistakes in those sources and do not apply here.
+
+BSD license is one of the most flexible open source licenses. It allows you to redistribute (including to sell) and use UDT in either source or binary form, with or without modification. However, you MUST keep or reproduce the complete license in your redistribution.
+
+---
     - UDT Build System - Apache 2.0 License
       https://github.com/dorkbox
       Copyright 2015, dorkbox, llc

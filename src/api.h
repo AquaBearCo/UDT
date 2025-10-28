@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: BSD-3-Clause
 /*****************************************************************************
 Copyright (c) 2001 - 2010, The Board of Trustees of the University of Illinois.
 All rights reserved.

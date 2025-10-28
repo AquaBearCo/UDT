@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 ################################################################################
 # Makefile for creating the app launcher program.
 #
