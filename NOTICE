@@ -1,0 +1,6 @@
+UDT NOTICE
+
+- Library (UDT v4 code): BSD-3-Clause (University of Illinois / Barchart)
+- Build system (CMake/Make/scripts): Apache-2.0 (Dorkbox)
+
+Upstream license reference: https://udt.sourceforge.io/license.html
