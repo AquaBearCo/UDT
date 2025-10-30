@@ -1,0 +1,9 @@
+/mnt/c/dev/udt-dev-refactor/build/linux-x64-release/CMakeFiles/udt_objs.dir
+/mnt/c/dev/udt-dev-refactor/build/linux-x64-release/CMakeFiles/udt.dir
+/mnt/c/dev/udt-dev-refactor/build/linux-x64-release/CMakeFiles/udt_static.dir
+/mnt/c/dev/udt-dev-refactor/build/linux-x64-release/CMakeFiles/edit_cache.dir
+/mnt/c/dev/udt-dev-refactor/build/linux-x64-release/CMakeFiles/rebuild_cache.dir
+/mnt/c/dev/udt-dev-refactor/build/linux-x64-release/CMakeFiles/list_install_components.dir
+/mnt/c/dev/udt-dev-refactor/build/linux-x64-release/CMakeFiles/install.dir
+/mnt/c/dev/udt-dev-refactor/build/linux-x64-release/CMakeFiles/install/local.dir
+/mnt/c/dev/udt-dev-refactor/build/linux-x64-release/CMakeFiles/install/strip.dir

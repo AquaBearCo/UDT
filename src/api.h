@@ -220,13 +220,16 @@ private:
    std::map<int64_t, std::set<UDTSOCKET> > m_PeerRec;// record sockets from peers to avoid repeated connection request, int64_t = (socker_id << 30) + isn
 
 private:
-   udt_pthread_key_t m_TLSError;                     // thread local error record (last error)
+   // Thread-local storage (TLS): per-thread last error record (not Transport Layer Security)
+   udt_pthread_key_t m_TLSError;                     // thread-local storage (TLS) last error
    #ifndef WINDOWS
+      // TLS cleanup (thread-local storage): deletes per-thread last error on thread exit
       static void TLSDestroy(void* e) {if (NULL != e) delete (CUDTException*)e;}
    #else
-      std::map<DWORD, CUDTException*> m_mTLSRecord;
-      void checkTLSValue();
-      udt_pthread_mutex_t m_TLSLock;
+      // Windows TLS bookkeeping (thread-local storage tracking)
+      std::map<DWORD, CUDTException*> m_mTLSRecord;  // TLS map keyed by thread id
+      void checkTLSValue();                           // validate/reap stale TLS entries
+      udt_pthread_mutex_t m_TLSLock;                  // protects TLS map
    #endif
 
 private:

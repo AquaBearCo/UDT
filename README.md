@@ -18,6 +18,8 @@ UDT is developed by [Yunhong Gu](http://www.linkedin.com/in/yunhong) and others 
 
 UDT C++ implementation is available under [BSD license](http://udt.sourceforge.net/license.html)
 
+Note on terminology: Throughout this project, the acronym TLS refers to thread-local storage (per-thread data), not Transport Layer Security. Any references to "TLS keys" are about thread-local error storage used internally by the UDT library.
+
 
 ### Key Features
 

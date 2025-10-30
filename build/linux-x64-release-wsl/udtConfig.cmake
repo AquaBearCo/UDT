@@ -1,0 +1,8 @@
+
+
+include(CMakeFindDependencyMacro)
+
+include("${CMAKE_CURRENT_LIST_DIR}/udt-targets.cmake")
+
+check_required_components(udt)
+

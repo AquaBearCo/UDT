@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0
 #*******************************************************************************
 #
@@ -67,40 +67,7 @@
 #  limitations under the License.
 ######################################################################
 
-readonly true=1 yes=1 no=0 false=0
-
-
-BUILD_ENV=`uname -s`-`uname -m`
-
-
-if [[ "$BUILD_ENV" != "Linux-x86_64" ]]; then
-  echo " ********"
-  echo " ******** Can ONLY build on [[ $BUILD_ENV ]]"
-  echo " ********"
-  return false
-fi
-
-echo " ********"
-echo " ******** Build Environment: [[ $BUILD_ENV ]]"
-echo " ********"
-
-export PROGRAM_DEPLOY=true
-
-#############
-#core function that will build our targets
-#############
-build() {
-  BUILD_TYPE=$1
-  export COMPILE_OS=$2
-  export COMPILE_OS_ARCH=$3
-
-  echo " ********"
-  echo " ******** Building: ${COMPILE_OS}""_""${COMPILE_OS_ARCH}"
-  echo " ********"
-
-  # compile
-  make -f $BUILD_TYPE all
-}
+set -euo pipefail
 
 
 ####################################################################
@@ -112,90 +79,51 @@ build() {
 ####################################################################
 ####################################################################
 BUILD_ALL=false
-
-if [ -z "$1" ]; then
-  BUILD_ALL=true
-elif [[ "$1" == "all" ]]; then
-  BUILD_ALL=true
-fi
+if [ -z "${1:-}" ] || [[ "$1" == "all" ]]; then BUILD_ALL=true; fi
 
 
 # No args will build all.
 if [[ $BUILD_ALL == true ]]; then
-  if [ -z "$1" ]; then
-    echo " ******** Building linux (32/64), macosx (32/64), windows (32/64)"
-    echo " ******** Press enter to continue... "
-    read VARNAME
-  fi
-
-  # LINUX
-  build "make_linux.mak" linux 32
-  build "make_linux.mak" linux 64
-
-
-  # WINDOWS
-  build "make_windows.mak" windows 32
-  build "make_windows.mak" windows 64
-
-
-  # MAC
-  build "make_macosx.mak" macosx 32
-  build "make_macosx.mak" macosx 64
+  cmake --preset linux-x64-release && cmake --build --preset build-linux-x64-release
+  cmake --preset linux-x64-debug && cmake --build --preset build-linux-x64-debug
+  cmake --preset linux-aarch64-release && cmake --build --preset build-linux-aarch64-release
+  cmake --preset linux-armv7hf-release && cmake --build --preset build-linux-armv7hf-release
+  cmake --preset win-x64-release && cmake --build --preset build-win-x64-release || true
+  cmake --preset win-x64-debug && cmake --build --preset build-win-x64-debug || true
+  cmake --preset win-arm64-release && cmake --build --preset build-win-arm64-release || true
+  cmake --preset macos-arm64-release && cmake --build --preset build-macos-arm64-release || true
+  cmake --preset macos-arm64-debug && cmake --build --preset build-macos-arm64-debug || true
 else
   # LINUX
   if [[ "$1" == "linux" ]]; then
-      echo " ******** Building linux (32/64)"
-
-      build "make_linux.mak" linux 32
-      build "make_linux.mak" linux 64
-  elif [[ "$1" == "linux_32" ]]; then
-      build "make_linux.mak" linux 32
-  elif [[ "$1" == "linux_64" ]]; then
-      build "make_linux.mak" linux 64
+      cmake --preset linux-x64-release && cmake --build --preset build-linux-x64-release
+      cmake --preset linux-x64-debug && cmake --build --preset build-linux-x64-debug
+  elif [[ "$1" == "linux-aarch64" ]]; then
+      cmake --preset linux-aarch64-release && cmake --build --preset build-linux-aarch64-release
+  elif [[ "$1" == "linux-armv7hf" ]]; then
+      cmake --preset linux-armv7hf-release && cmake --build --preset build-linux-armv7hf-release
 
   # WINDOWS
   elif [[ "$1" == "windows" ]]; then
-      #all
-      echo " ******** Building windows (32/64)"
-
-      build "make_windows.mak" windows 32
-      build "make_windows.mak" windows 64
-
-  elif [[ "$1" == "windows_32" ]]; then
-      build "make_windows.mak" windows 32
-  elif [[ "$1" == "windows_64" ]]; then
-      build "make_windows.mak" windows 64
+      cmake --preset win-x64-release && cmake --build --preset build-win-x64-release || true
+      cmake --preset win-x64-debug && cmake --build --preset build-win-x64-debug || true
+  elif [[ "$1" == "windows-arm64" ]]; then
+      cmake --preset win-arm64-release && cmake --build --preset build-win-arm64-release || true
 
   # MAC
   elif [[ "$1" == "macosx" ]]; then
-      #all
-      echo " ******** Building macosx (32/64)"
-
-      build "make_macosx.mak" macosx 32
-      build "make_macosx.mak" macosx 64
-  elif [[ "$1" == "macosx_32" ]]; then
-      build "make_macosx.mak" macosx 32
-  elif [[ "$1" == "macosx_64" ]]; then
-      build "make_macosx.mak" macosx 64
+      cmake --preset macos-arm64-release && cmake --build --preset build-macos-arm64-release || true
+      cmake --preset macos-arm64-debug && cmake --build --preset build-macos-arm64-debug || true
 
   else
     echo "Please one of the following:"
-    echo "   [all] - builds all of them"
-    echo ""
-    echo "linux"
-    echo "   linux [all]    - builds 32 and 64 bit linux"
-    echo "   linux_32 [all] - builds 32 bit linux"
-    echo "   linux_64 [all] - builds 64 bit linux"
-    echo ""
-    echo "mac"
-    echo "   macosx [all]    - builds 32 and 64 bit mac"
-    echo "   macosx_32 [all] - builds 32 bit mac"
-    echo "   macosx_64 [all] - builds 64 bit mac"
-    echo ""
-    echo "windows"
-    echo "   windows [all]    - builds 32 and 64 bit windows"
-    echo "   windows_32 [all] - builds 32 bit windows"
-    echo "   windows_64 [all] - builds 64 bit windows"
+    echo "   [all] - builds linux x64, aarch64, armv7hf; windows x64/arm64; macOS arm64"
+    echo "   linux            - builds Linux x64 (Release/Debug)"
+    echo "   linux-aarch64    - builds Linux aarch64 (Release)"
+    echo "   linux-armv7hf    - builds Linux armv7 hard-float (Release)"
+    echo "   windows          - builds Windows x64 (Release/Debug)"
+    echo "   windows-arm64    - builds Windows ARM64 (Release)"
+    echo "   macosx           - builds macOS arm64 (Release/Debug)"
     exit 0
   fi
 fi

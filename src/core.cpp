@@ -55,6 +55,7 @@ written by
 #include <sstream>
 #include "queue.h"
 #include "core.h"
+#include "udt/plat/sync.h"
 
 using namespace std;
 
@@ -646,7 +647,9 @@ void CUDT::connect(const sockaddr* serv_addr)
    char* resdata = new char [m_iPayloadSize];
    response.pack(0, NULL, resdata, m_iPayloadSize);
 
-   CUDTException e(0, 0);
+   int errMajor = 0;
+   int errMinor = 0;
+   int errSys = 0;
 
    while (!m_bClosing)
    {
@@ -674,7 +677,7 @@ void CUDT::connect(const sockaddr* serv_addr)
       if (CTimer::getTime() > ttl)
       {
          // timeout
-         e = CUDTException(1, 1, 0);
+         errMajor = 1; errMinor = 1; errSys = 0;
          break;
       }
    }
@@ -682,21 +685,21 @@ void CUDT::connect(const sockaddr* serv_addr)
    delete [] reqdata;
    delete [] resdata;
 
-   if (e.getErrorCode() == 0)
+   if (errMajor == 0 && errMinor == 0)
    {
       if (m_bClosing)                                                 // if the socket is closed before connection...
-         e = CUDTException(1);
+          { errMajor = 1; errMinor = 0; errSys = 0; }
       else if (1002 == m_ConnRes.m_iReqType)                          // connection request rejected
-         e = CUDTException(1, 2, 0);
+          { errMajor = 1; errMinor = 2; errSys = 0; }
       else if ((!m_bRendezvous) && (m_iISN != m_ConnRes.m_iISN))      // secuity check
-         e = CUDTException(1, 4, 0);
+          { errMajor = 1; errMinor = 4; errSys = 0; }
    }
 
-   if (e.getErrorCode() != 0)
-      throw e;
+   if (errMajor != 0 || errMinor != 0)
+      throw CUDTException(errMajor, errMinor, errSys);
 }
 
-int CUDT::connect(const CPacket& response) throw ()
+int CUDT::connect(const CPacket& response)
 {
    // this is the 2nd half of a connection request. If the connection is setup successfully this returns 0.
    // returning -1 means there is an error.
@@ -1063,7 +1066,7 @@ int CUDT::send(const char* data, int len)
             if (m_iSndTimeOut < 0)
             {
                while (!m_bBroken && m_bConnected && !m_bClosing && (m_iSndBufSize <= m_pSndBuffer->getCurrBufSize()) && m_bPeerHealth)
-                  pthread_cond_wait(&m_SendBlockCond, &m_SendBlockLock);
+                  udt::plat::cond_wait(&m_SendBlockCond, &m_SendBlockLock);
             }
             else
             {
@@ -1163,7 +1166,7 @@ int CUDT::recv(char* data, int len)
             if (m_iRcvTimeOut < 0)
             {
                while (!m_bBroken && m_bConnected && !m_bClosing && (0 == m_pRcvBuffer->getRcvDataSize()))
-                  pthread_cond_wait(&m_RecvDataCond, &m_RecvDataLock);
+                  udt::plat::cond_wait(&m_RecvDataCond, &m_RecvDataLock);
             }
             else
             {
@@ -1262,7 +1265,7 @@ int CUDT::sendmsg(const char* data, int len, int msttl, bool inorder)
             if (m_iSndTimeOut < 0)
             {
                while (!m_bBroken && m_bConnected && !m_bClosing && ((m_iSndBufSize - m_pSndBuffer->getCurrBufSize()) * m_iPayloadSize < len))
-                  pthread_cond_wait(&m_SendBlockCond, &m_SendBlockLock);
+                  udt::plat::cond_wait(&m_SendBlockCond, &m_SendBlockLock);
             }
             else
             {
@@ -1376,7 +1379,7 @@ int CUDT::recvmsg(char* data, int len)
          if (m_iRcvTimeOut < 0)
          {
             while (!m_bBroken && m_bConnected && !m_bClosing && (0 == (res = m_pRcvBuffer->readMsg(data, len))))
-               pthread_cond_wait(&m_RecvDataCond, &m_RecvDataLock);
+               udt::plat::cond_wait(&m_RecvDataCond, &m_RecvDataLock);
          }
          else
          {
@@ -1475,7 +1478,7 @@ int64_t CUDT::sendfile(fstream& ifs, int64_t& offset, int64_t size, int block)
       #ifndef WINDOWS
          pthread_mutex_lock(&m_SendBlockLock);
          while (!m_bBroken && m_bConnected && !m_bClosing && (m_iSndBufSize <= m_pSndBuffer->getCurrBufSize()) && m_bPeerHealth)
-            pthread_cond_wait(&m_SendBlockCond, &m_SendBlockLock);
+            udt::plat::cond_wait(&m_SendBlockCond, &m_SendBlockLock);
          pthread_mutex_unlock(&m_SendBlockLock);
       #else
          while (!m_bBroken && m_bConnected && !m_bClosing && (m_iSndBufSize <= m_pSndBuffer->getCurrBufSize()) && m_bPeerHealth)
@@ -1562,7 +1565,7 @@ int64_t CUDT::recvfile(fstream& ofs, int64_t& offset, int64_t size, int block)
       #ifndef WINDOWS
          pthread_mutex_lock(&m_RecvDataLock);
          while (!m_bBroken && m_bConnected && !m_bClosing && (0 == m_pRcvBuffer->getRcvDataSize()))
-            pthread_cond_wait(&m_RecvDataCond, &m_RecvDataLock);
+            udt::plat::cond_wait(&m_RecvDataCond, &m_RecvDataLock);
          pthread_mutex_unlock(&m_RecvDataLock);
       #else
          while (!m_bBroken && m_bConnected && !m_bClosing && (0 == m_pRcvBuffer->getRcvDataSize()))
@@ -1729,14 +1732,14 @@ void CUDT::releaseSynch()
    #ifndef WINDOWS
       // wake up user calls
       pthread_mutex_lock(&m_SendBlockLock);
-      pthread_cond_signal(&m_SendBlockCond);
+      udt::plat::cond_signal(&m_SendBlockCond);
       pthread_mutex_unlock(&m_SendBlockLock);
 
       pthread_mutex_lock(&m_SendLock);
       pthread_mutex_unlock(&m_SendLock);
 
       pthread_mutex_lock(&m_RecvDataLock);
-      pthread_cond_signal(&m_RecvDataCond);
+      udt::plat::cond_signal(&m_RecvDataCond);
       pthread_mutex_unlock(&m_RecvDataLock);
 
       pthread_mutex_lock(&m_RecvLock);
@@ -1798,7 +1801,7 @@ void CUDT::sendCtrl(int pkttype, void* lparam, void* rparam, int size)
          #ifndef WINDOWS
             pthread_mutex_lock(&m_RecvDataLock);
             if (m_bSynRecving)
-               pthread_cond_signal(&m_RecvDataCond);
+               udt::plat::cond_signal(&m_RecvDataCond);
             pthread_mutex_unlock(&m_RecvDataLock);
          #else
             if (m_bSynRecving)
@@ -2055,7 +2058,7 @@ void CUDT::processCtrl(CPacket& ctrlpkt)
       #ifndef WINDOWS
          pthread_mutex_lock(&m_SendBlockLock);
          if (m_bSynSending)
-            pthread_cond_signal(&m_SendBlockCond);
+            udt::plat::cond_signal(&m_SendBlockCond);
          pthread_mutex_unlock(&m_SendBlockLock);
       #else
          if (m_bSynSending)

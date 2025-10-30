@@ -163,6 +163,7 @@ int CEPoll::verify_usock(const int eid, const UDTSOCKET& u, int* events)
 
 int CEPoll::add_ssock(const int eid, const SYSSOCKET& s, const int* events)
 {
+   (void)events; // may be unused on non-Linux builds
    CGuard pg(m_EPollLock);
 
    map<int, CEPollDesc>::iterator p = m_mPolls.find(eid);
