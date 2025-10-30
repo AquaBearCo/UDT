@@ -767,7 +767,7 @@ int CUDTUnited::connect(const UDTSOCKET u, const sockaddr* name, int namelen)
    {
       s->m_pUDT->connect(name);
    }
-   catch (CUDTException e)
+catch (const CUDTException& e)
    {
       s->m_Status = OPENED;
       throw e;
@@ -1711,7 +1711,7 @@ int CUDT::connect(UDTSOCKET u, const sockaddr* name, int namelen)
    {
       return s_UDTUnited.connect(u, name, namelen);
    }
-   catch (CUDTException e)
+catch (const CUDTException& e)
    {
       s_UDTUnited.setError(new CUDTException(e));
       return ERROR;
@@ -1734,7 +1734,7 @@ int CUDT::flush(UDTSOCKET u)
    {
       return s_UDTUnited.flush(u);
    }
-   catch (CUDTException e)
+catch (const CUDTException& e)
    {
       s_UDTUnited.setError(new CUDTException(e));
       return ERROR;
@@ -1752,7 +1752,7 @@ int CUDT::close(UDTSOCKET u)
    {
       return s_UDTUnited.close(u);
    }
-   catch (CUDTException e)
+catch (const CUDTException& e)
    {
       s_UDTUnited.setError(new CUDTException(e));
       return ERROR;
@@ -1770,7 +1770,7 @@ int CUDT::getpeername(UDTSOCKET u, sockaddr* name, int* namelen)
    {
       return s_UDTUnited.getpeername(u, name, namelen);
    }
-   catch (CUDTException e)
+catch (const CUDTException& e)
    {
       s_UDTUnited.setError(new CUDTException(e));
       return ERROR;
@@ -1788,7 +1788,7 @@ int CUDT::getsockname(UDTSOCKET u, sockaddr* name, int* namelen)
    {
       return s_UDTUnited.getsockname(u, name, namelen);;
    }
-   catch (CUDTException e)
+catch (const CUDTException& e)
    {
       s_UDTUnited.setError(new CUDTException(e));
       return ERROR;
@@ -1808,7 +1808,7 @@ int CUDT::getsockopt(UDTSOCKET u, int, UDTOpt optname, void* optval, int* optlen
       udt->getOpt(optname, optval, *optlen);
       return 0;
    }
-   catch (CUDTException e)
+catch (const CUDTException& e)
    {
       s_UDTUnited.setError(new CUDTException(e));
       return ERROR;
@@ -1828,7 +1828,7 @@ int CUDT::setsockopt(UDTSOCKET u, int, UDTOpt optname, const void* optval, int o
       udt->setOpt(optname, optval, optlen);
       return 0;
    }
-   catch (CUDTException e)
+catch (const CUDTException& e)
    {
       s_UDTUnited.setError(new CUDTException(e));
       return ERROR;
@@ -1847,7 +1847,7 @@ int CUDT::send(UDTSOCKET u, const char* buf, int len, int)
       CUDT* udt = s_UDTUnited.lookup(u);
       return udt->send(buf, len);
    }
-   catch (CUDTException e)
+catch (const CUDTException& e)
    {
       s_UDTUnited.setError(new CUDTException(e));
       return ERROR;
@@ -1871,7 +1871,7 @@ int CUDT::recv(UDTSOCKET u, char* buf, int len, int)
       CUDT* udt = s_UDTUnited.lookup(u);
       return udt->recv(buf, len);
    }
-   catch (CUDTException e)
+catch (const CUDTException& e)
    {
       s_UDTUnited.setError(new CUDTException(e));
       return ERROR;
@@ -1890,7 +1890,7 @@ int CUDT::sendmsg(UDTSOCKET u, const char* buf, int len, int ttl, bool inorder)
       CUDT* udt = s_UDTUnited.lookup(u);
       return udt->sendmsg(buf, len, ttl, inorder);
    }
-   catch (CUDTException e)
+catch (const CUDTException& e)
    {
       s_UDTUnited.setError(new CUDTException(e));
       return ERROR;
@@ -1914,7 +1914,7 @@ int CUDT::recvmsg(UDTSOCKET u, char* buf, int len)
       CUDT* udt = s_UDTUnited.lookup(u);
       return udt->recvmsg(buf, len);
    }
-   catch (CUDTException e)
+catch (const CUDTException& e)
    {
       s_UDTUnited.setError(new CUDTException(e));
       return ERROR;
@@ -1933,7 +1933,7 @@ int64_t CUDT::sendfile(UDTSOCKET u, fstream& ifs, int64_t& offset, int64_t size,
       CUDT* udt = s_UDTUnited.lookup(u);
       return udt->sendfile(ifs, offset, size, block);
    }
-   catch (CUDTException e)
+catch (const CUDTException& e)
    {
       s_UDTUnited.setError(new CUDTException(e));
       return ERROR;
@@ -1957,7 +1957,7 @@ int64_t CUDT::recvfile(UDTSOCKET u, fstream& ofs, int64_t& offset, int64_t size,
       CUDT* udt = s_UDTUnited.lookup(u);
       return udt->recvfile(ofs, offset, size, block);
    }
-   catch (CUDTException e)
+catch (const CUDTException& e)
    {
       s_UDTUnited.setError(new CUDTException(e));
       return ERROR;
@@ -1981,7 +1981,7 @@ int CUDT::select(int, ud_set* readfds, ud_set* writefds, ud_set* exceptfds, cons
    {
       return s_UDTUnited.select(readfds, writefds, exceptfds, timeout);
    }
-   catch (CUDTException e)
+catch (const CUDTException& e)
    {
       s_UDTUnited.setError(new CUDTException(e));
       return ERROR;
@@ -2010,7 +2010,7 @@ int CUDT::selectEx(const vector<UDTSOCKET>& fds, vector<UDTSOCKET>* readfds, vec
    {
       return s_UDTUnited.selectEx(fds, readfds, writefds, exceptfds, msTimeOut);
    }
-   catch (CUDTException e)
+catch (const CUDTException& e)
    {
       s_UDTUnited.setError(new CUDTException(e));
       return ERROR;
@@ -2033,7 +2033,7 @@ int CUDT::epoll_create()
    {
       return s_UDTUnited.epoll_create();
    }
-   catch (CUDTException e)
+catch (const CUDTException& e)
    {
       s_UDTUnited.setError(new CUDTException(e));
       return ERROR;
@@ -2051,7 +2051,7 @@ int CUDT::epoll_add_usock(const int eid, const UDTSOCKET u, const int* events)
    {
       return s_UDTUnited.epoll_add_usock(eid, u, events);
    }
-   catch (CUDTException e)
+catch (const CUDTException& e)
    {
       s_UDTUnited.setError(new CUDTException(e));
       return ERROR;
@@ -2070,7 +2070,7 @@ int CUDT::epoll_update_usock(const int eid, const UDTSOCKET u, const int* events
    {
       return s_UDTUnited.epoll_update_usock(eid, u, events);
    }
-   catch (CUDTException e)
+catch (const CUDTException& e)
    {
       s_UDTUnited.setError(new CUDTException(e));
       return ERROR;
@@ -2089,7 +2089,7 @@ int CUDT::epoll_verify_usock(const int eid, const UDTSOCKET u, int* events)
    {
       return s_UDTUnited.epoll_verify_usock(eid, u, events);
    }
-   catch (CUDTException e)
+catch (const CUDTException& e)
    {
       s_UDTUnited.setError(new CUDTException(e));
       return ERROR;
@@ -2108,7 +2108,7 @@ int CUDT::epoll_add_ssock(const int eid, const SYSSOCKET s, const int* events)
    {
       return s_UDTUnited.epoll_add_ssock(eid, s, events);
    }
-   catch (CUDTException e)
+catch (const CUDTException& e)
    {
       s_UDTUnited.setError(new CUDTException(e));
       return ERROR;
@@ -2126,7 +2126,7 @@ int CUDT::epoll_remove_usock(const int eid, const UDTSOCKET u)
    {
       return s_UDTUnited.epoll_remove_usock(eid, u);
    }
-   catch (CUDTException e)
+catch (const CUDTException& e)
    {
       s_UDTUnited.setError(new CUDTException(e));
       return ERROR;
@@ -2144,7 +2144,7 @@ int CUDT::epoll_remove_ssock(const int eid, const SYSSOCKET s)
    {
       return s_UDTUnited.epoll_remove_ssock(eid, s);
    }
-   catch (CUDTException e)
+   catch (const CUDTException& e)
    {
       s_UDTUnited.setError(new CUDTException(e));
       return ERROR;
@@ -2162,7 +2162,7 @@ int CUDT::epoll_wait(const int eid, set<UDTSOCKET>* readfds, set<UDTSOCKET>* wri
    {
       return s_UDTUnited.epoll_wait(eid, readfds, writefds, msTimeOut, lrfds, lwfds);
    }
-   catch (CUDTException e)
+   catch (const CUDTException& e)
    {
       s_UDTUnited.setError(new CUDTException(e));
       return ERROR;
@@ -2180,7 +2180,7 @@ int CUDT::epoll_release(const int eid)
    {
       return s_UDTUnited.epoll_release(eid);
    }
-   catch (CUDTException e)
+   catch (const CUDTException& e)
    {
       s_UDTUnited.setError(new CUDTException(e));
       return ERROR;
@@ -2205,7 +2205,7 @@ int CUDT::perfmon(UDTSOCKET u, CPerfMon* perf, bool clear)
       udt->sample(perf, clear);
       return 0;
    }
-   catch (CUDTException e)
+   catch (const CUDTException& e)
    {
       s_UDTUnited.setError(new CUDTException(e));
       return ERROR;

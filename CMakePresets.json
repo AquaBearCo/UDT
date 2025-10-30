@@ -1,0 +1,130 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": { "major": 3, "minor": 16, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "linux-x64-release",
+      "displayName": "Linux x86_64 Release",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/linux-x64-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "macos-arm64-release",
+      "displayName": "macOS arm64 Release",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/macos-arm64-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_OSX_ARCHITECTURES": "arm64"
+      }
+    },
+    {
+      "name": "macos-arm64-debug",
+      "displayName": "macOS arm64 Debug",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/macos-arm64-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_OSX_ARCHITECTURES": "arm64"
+      }
+    },
+    {
+      "name": "linux-x64-debug",
+      "displayName": "Linux x86_64 Debug",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/linux-x64-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "linux-aarch64-release",
+      "displayName": "Linux aarch64 Release",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/linux-aarch64-release",
+      "toolchainFile": "${sourceDir}/toolchains/aarch64.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "linux-aarch64-debug",
+      "displayName": "Linux aarch64 Debug",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/linux-aarch64-debug",
+      "toolchainFile": "${sourceDir}/toolchains/aarch64.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "linux-armv7hf-release",
+      "displayName": "Linux armv7hf Release",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/linux-armv7hf-release",
+      "toolchainFile": "${sourceDir}/toolchains/armv7hf.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "linux-armv7hf-debug",
+      "displayName": "Linux armv7hf Debug",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/linux-armv7hf-debug",
+      "toolchainFile": "${sourceDir}/toolchains/armv7hf.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "win-x64-release",
+      "displayName": "Windows x64 Release",
+      "generator": "Visual Studio 17 2022",
+      "binaryDir": "${sourceDir}/build/win-x64",
+      "architecture": {
+        "value": "x64"
+      },
+      "cacheVariables": {
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded"
+      }
+    },
+    {
+      "name": "win-x64-debug",
+      "displayName": "Windows x64 Debug",
+      "generator": "Visual Studio 17 2022",
+      "binaryDir": "${sourceDir}/build/win-x64-debug",
+      "architecture": {
+        "value": "x64"
+      }
+    },
+    {
+      "name": "win-arm64-release",
+      "displayName": "Windows ARM64 Release",
+      "generator": "Visual Studio 17 2022",
+      "binaryDir": "${sourceDir}/build/win-arm64",
+      "architecture": {
+        "value": "ARM64"
+      },
+      "cacheVariables": {
+        "CMAKE_MSVC_RUNTIME_LIBRARY": "MultiThreaded"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "build-linux-x64", "configurePreset": "linux-x64-release" },
+    { "name": "build-linux-x64-debug", "configurePreset": "linux-x64-debug" },
+    { "name": "build-linux-aarch64", "configurePreset": "linux-aarch64-release" },
+    { "name": "build-linux-aarch64-debug", "configurePreset": "linux-aarch64-debug" },
+    { "name": "build-linux-armv7hf", "configurePreset": "linux-armv7hf-release" },
+    { "name": "build-linux-armv7hf-debug", "configurePreset": "linux-armv7hf-debug" },
+    { "name": "build-win-x64", "configurePreset": "win-x64-release" },
+    { "name": "build-win-x64-debug", "configurePreset": "win-x64-debug" },
+    { "name": "build-win-arm64", "configurePreset": "win-arm64-release" }
+    ,{ "name": "build-macos-arm64", "configurePreset": "macos-arm64-release" }
+    ,{ "name": "build-macos-arm64-debug", "configurePreset": "macos-arm64-debug" }
+  ]
+}

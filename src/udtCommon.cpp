@@ -57,6 +57,7 @@ written by
 #include <cmath>
 #include "md5.h"
 #include "udtCommon.h"
+#include "udt/plat/sync.h"
 
 bool CTimer::m_bUseMicroSecond = false;
 uint64_t CTimer::s_ullCPUFrequency = CTimer::readCPUFrequency();
@@ -265,7 +266,7 @@ void CTimer::interrupt()
 void CTimer::tick()
 {
    #ifndef WINDOWS
-      pthread_cond_signal(&m_TickCond);
+      udt::plat::cond_signal(&m_TickCond);
    #else
       SetEvent(m_TickCond);
    #endif
@@ -305,7 +306,7 @@ uint64_t CTimer::getTime()
 void CTimer::triggerEvent()
 {
    #ifndef WINDOWS
-      pthread_cond_signal(&m_EventCond);
+      udt::plat::cond_signal(&m_EventCond);
    #else
       SetEvent(m_EventCond);
    #endif

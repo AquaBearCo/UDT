@@ -47,6 +47,7 @@ written by
 #include <cstring>
 
 #include "udtCommon.h"
+#include "udt/plat/sync.h"
 #include "core.h"
 #include "queue.h"
 
@@ -391,7 +392,7 @@ void CSndUList::insert_(int64_t ts, const CUDT* u)
    {
       #ifndef WINDOWS
          pthread_mutex_lock(m_pWindowLock);
-         pthread_cond_signal(m_pWindowCond);
+         udt::plat::cond_signal(m_pWindowCond);
          pthread_mutex_unlock(m_pWindowLock);
       #else
          SetEvent(*m_pWindowCond);
@@ -467,7 +468,7 @@ CSndQueue::~CSndQueue()
 
    #ifndef WINDOWS
       pthread_mutex_lock(&m_WindowLock);
-      pthread_cond_signal(&m_WindowCond);
+      udt::plat::cond_signal(&m_WindowCond);
       pthread_mutex_unlock(&m_WindowLock);
       if (0 != m_WorkerThread)
          pthread_join(m_WorkerThread, NULL);
@@ -543,7 +544,7 @@ void CSndQueue::init(CChannel* c, CTimer* t)
          #ifndef WINDOWS
             pthread_mutex_lock(&self->m_WindowLock);
             if (!self->m_bClosing && (self->m_pSndUList->m_iLastEntry < 0))
-               pthread_cond_wait(&self->m_WindowCond, &self->m_WindowLock);
+               udt::plat::cond_wait(&self->m_WindowCond, &self->m_WindowLock);
             pthread_mutex_unlock(&self->m_WindowLock);
          #else
             WaitForSingleObject(self->m_WindowCond, INFINITE);
@@ -1236,7 +1237,7 @@ void CRcvQueue::storePkt(int32_t id, CPacket* pkt)
       m_mBuffer[id].push(pkt);
 
       #ifndef WINDOWS
-         pthread_cond_signal(&m_PassCond);
+         udt::plat::cond_signal(&m_PassCond);
       #else
          SetEvent(m_PassCond);
       #endif

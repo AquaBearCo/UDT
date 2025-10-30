@@ -1,0 +1,20 @@
+# ninja log v5
+206	399	1761801505491017900	CMakeFiles/udt_objs.dir/src/plat/win/sync.cpp.o	b84d9f3f9b358e94
+245	463	1761801505499924200	CMakeFiles/udt_objs.dir/src/plat/win/net.cpp.o	6f95d00d51a31cc9
+163	542	1761801505626483400	CMakeFiles/udt_objs.dir/src/md5.cpp.o	8e0bef1d48665e46
+175	1825	1761801506901311000	CMakeFiles/udt_objs.dir/src/packet.cpp.o	f7e19f0db7caab64
+135	1999	1761801507030236100	CMakeFiles/udt_objs.dir/src/channel.cpp.o	af050ec355b3eca6
+194	2061	1761801507031243100	CMakeFiles/udt_objs.dir/src/plat/posix/sync.cpp.o	3a7c7efd3bec380a
+223	2107	1761801507082844800	CMakeFiles/udt_objs.dir/src/plat/posix/net.cpp.o	281d392b87ffce93
+156	2139	1761801507220016600	CMakeFiles/udt_objs.dir/src/list.cpp.o	348c44fea2239749
+127	2172	1761801507236294000	CMakeFiles/udt_objs.dir/src/cache.cpp.o	17aad24cf2a285d6
+132	2281	1761801507364087400	CMakeFiles/udt_objs.dir/src/ccc.cpp.o	7d6b9e7a88aeea03
+189	2391	1761801507481723100	CMakeFiles/udt_objs.dir/src/window.cpp.o	e7036827eb422383
+185	2403	1761801507481723100	CMakeFiles/udt_objs.dir/src/udtCommon.cpp.o	c45c5963a4e22856
+121	2425	1761801507501846700	CMakeFiles/udt_objs.dir/src/buffer.cpp.o	bfdac9be7ec41336
+151	2576	1761801507663939700	CMakeFiles/udt_objs.dir/src/epoll.cpp.o	d5243cb07ecc407
+182	3006	1761801508093664600	CMakeFiles/udt_objs.dir/src/queue.cpp.o	1df4d1406bf165db
+141	3573	1761801508659986300	CMakeFiles/udt_objs.dir/src/core.cpp.o	b8883f77888e5f27
+114	4374	1761801509462051800	CMakeFiles/udt_objs.dir/src/api.cpp.o	9ae42839ccdd85ac
+4382	4776	1761801509872514200	libudt.a	6356ac3401eeb03d
+4381	5297	1761801510380603800	libudt.so	f97db91974615fda

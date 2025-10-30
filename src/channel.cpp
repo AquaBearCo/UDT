@@ -54,6 +54,7 @@ written by
 #endif
 #include "channel.h"
 #include "packet.h"
+#include "udt/plat/net.h"
 
 #ifdef WINDOWS
    #define socklen_t int
@@ -90,22 +91,24 @@ CChannel::~CChannel()
 
 void CChannel::open(const sockaddr* addr)
 {
-   // construct an socket
-   m_iSocket = ::socket(m_iIPversion, SOCK_DGRAM, 0);
-
-   #ifdef WINDOWS
-      if (INVALID_SOCKET == m_iSocket)
-   #else
-      if (m_iSocket < 0)
-   #endif
-      throw CUDTException(1, 0, NET_ERROR);
+   // construct a socket via portability layer
+   {
+      std::error_code ec;
+      if (udt::plat::UdpSocket::create(m_iIPversion == AF_INET ? udt::plat::Family::V4 : udt::plat::Family::V6, m_iSocket, ec) != 0)
+         throw CUDTException(1, 0, ec.value());
+   }
 
    if (NULL != addr)
    {
       socklen_t namelen = m_iSockAddrSize;
-
-      if (0 != ::bind(m_iSocket, addr, namelen))
-         throw CUDTException(1, 3, NET_ERROR);
+      {
+         std::error_code ec;
+         // Set reuseaddr/reuseport before bind to improve ephemeral bind behavior
+         (void)udt::plat::UdpSocket::set_reuseaddr(m_iSocket, true, ec);
+         (void)udt::plat::UdpSocket::set_reuseport(m_iSocket, true, ec);
+         if (udt::plat::UdpSocket::bind(m_iSocket, addr, namelen, ec) != 0)
+            throw CUDTException(1, 3, ec.value());
+      }
    }
    else
    {
@@ -122,8 +125,14 @@ void CChannel::open(const sockaddr* addr)
       if (0 != ::getaddrinfo(NULL, "0", &hints, &res))
          throw CUDTException(1, 3, NET_ERROR);
 
-      if (0 != ::bind(m_iSocket, res->ai_addr, res->ai_addrlen))
-         throw CUDTException(1, 3, NET_ERROR);
+      {
+         std::error_code ec;
+         // Set reuseaddr/reuseport before bind to improve ephemeral bind behavior
+         (void)udt::plat::UdpSocket::set_reuseaddr(m_iSocket, true, ec);
+         (void)udt::plat::UdpSocket::set_reuseport(m_iSocket, true, ec);
+         if (udt::plat::UdpSocket::bind(m_iSocket, res->ai_addr, static_cast<int>(res->ai_addrlen), ec) != 0)
+            throw CUDTException(1, 3, ec.value());
+      }
 
       ::freeaddrinfo(res);
    }
@@ -142,64 +151,54 @@ void CChannel::setUDPSockOpt()
    #if defined(BSD) || defined(MACOSX)
       // BSD system will fail setsockopt if the requested buffer size exceeds system maximum value
       int maxsize = 64000;
-      if (0 != ::setsockopt(m_iSocket, SOL_SOCKET, SO_RCVBUF, (char*)&m_iRcvBufSize, sizeof(int)))
-         ::setsockopt(m_iSocket, SOL_SOCKET, SO_RCVBUF, (char*)&maxsize, sizeof(int));
-      if (0 != ::setsockopt(m_iSocket, SOL_SOCKET, SO_SNDBUF, (char*)&m_iSndBufSize, sizeof(int)))
-         ::setsockopt(m_iSocket, SOL_SOCKET, SO_SNDBUF, (char*)&maxsize, sizeof(int));
+      std::error_code ec1, ec2;
+      if (0 != udt::plat::UdpSocket::setsockopt_int(m_iSocket, SOL_SOCKET, SO_RCVBUF, m_iRcvBufSize, ec1))
+         (void)udt::plat::UdpSocket::setsockopt_int(m_iSocket, SOL_SOCKET, SO_RCVBUF, maxsize, ec1);
+      if (0 != udt::plat::UdpSocket::setsockopt_int(m_iSocket, SOL_SOCKET, SO_SNDBUF, m_iSndBufSize, ec2))
+         (void)udt::plat::UdpSocket::setsockopt_int(m_iSocket, SOL_SOCKET, SO_SNDBUF, maxsize, ec2);
    #else
       // for other systems, if requested is greated than maximum, the maximum value will be automactally used
-      if ((0 != ::setsockopt(m_iSocket, SOL_SOCKET, SO_RCVBUF, (char*)&m_iRcvBufSize, sizeof(int))) ||
-          (0 != ::setsockopt(m_iSocket, SOL_SOCKET, SO_SNDBUF, (char*)&m_iSndBufSize, sizeof(int))))
+      {
+         std::error_code ecA, ecB;
+         if ((0 != udt::plat::UdpSocket::setsockopt_int(m_iSocket, SOL_SOCKET, SO_RCVBUF, m_iRcvBufSize, ecA)) ||
+             (0 != udt::plat::UdpSocket::setsockopt_int(m_iSocket, SOL_SOCKET, SO_SNDBUF, m_iSndBufSize, ecB)))
          throw CUDTException(1, 3, NET_ERROR);
+      }
    #endif
 
-   timeval tv;
-   tv.tv_sec = 0;
-   #if defined (BSD) || defined (MACOSX)
-      // Known BSD bug as the day I wrote this code.
-      // A small time out value will cause the socket to block forever.
-      tv.tv_usec = 10000;
+   // No receive timeout is set on POSIX; channel is configured nonblocking instead.
+
+   #ifndef WINDOWS
+      // Set non-blocking I/O on POSIX
+      {
+         std::error_code ec;
+         if (udt::plat::UdpSocket::set_nonblocking(m_iSocket, udt::plat::NonBlocking::Yes, ec) != 0)
+            throw CUDTException(1, 3, ec.value());
+      }
    #else
-      tv.tv_usec = 100;
-   #endif
-
-   #ifdef UNIX
-      // Set non-blocking I/O
-      // UNIX does not support SO_RCVTIMEO
-      int opts = ::fcntl(m_iSocket, F_GETFL);
-      if (-1 == ::fcntl(m_iSocket, F_SETFL, opts | O_NONBLOCK))
-         throw CUDTException(1, 3, NET_ERROR);
-   #elif WINDOWS
       DWORD ot = 1; //milliseconds
       if (0 != ::setsockopt(m_iSocket, SOL_SOCKET, SO_RCVTIMEO, (char *)&ot, sizeof(DWORD)))
-         throw CUDTException(1, 3, NET_ERROR);
-   #else
-      // Set receiving time-out value
-      if (0 != ::setsockopt(m_iSocket, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv, sizeof(timeval)))
          throw CUDTException(1, 3, NET_ERROR);
    #endif
 }
 
 void CChannel::close() const
 {
-   #ifndef WINDOWS
-      ::close(m_iSocket);
-   #else
-      ::closesocket(m_iSocket);
-   #endif
+   std::error_code ec;
+   udt::plat::UdpSocket::close(m_iSocket, ec);
 }
 
 int CChannel::getSndBufSize()
 {
-   socklen_t size = sizeof(socklen_t);
-   ::getsockopt(m_iSocket, SOL_SOCKET, SO_SNDBUF, (char *)&m_iSndBufSize, &size);
+   int size = 0; std::error_code ec;
+   if (0 == udt::plat::UdpSocket::getsockopt_int(m_iSocket, SOL_SOCKET, SO_SNDBUF, size, ec)) m_iSndBufSize = size;
    return m_iSndBufSize;
 }
 
 int CChannel::getRcvBufSize()
 {
-   socklen_t size = sizeof(socklen_t);
-   ::getsockopt(m_iSocket, SOL_SOCKET, SO_RCVBUF, (char *)&m_iRcvBufSize, &size);
+   int size = 0; std::error_code ec;
+   if (0 == udt::plat::UdpSocket::getsockopt_int(m_iSocket, SOL_SOCKET, SO_RCVBUF, size, ec)) m_iRcvBufSize = size;
    return m_iRcvBufSize;
 }
 
@@ -215,14 +214,16 @@ void CChannel::setRcvBufSize(int size)
 
 void CChannel::getSockAddr(sockaddr* addr) const
 {
-   socklen_t namelen = m_iSockAddrSize;
-   ::getsockname(m_iSocket, addr, &namelen);
+   int namelen = m_iSockAddrSize;
+   std::error_code ec;
+   udt::plat::UdpSocket::getsockname(m_iSocket, addr, namelen, ec);
 }
 
 void CChannel::getPeerAddr(sockaddr* addr) const
 {
-   socklen_t namelen = m_iSockAddrSize;
-   ::getpeername(m_iSocket, addr, &namelen);
+   int namelen = m_iSockAddrSize;
+   std::error_code ec;
+   udt::plat::UdpSocket::getpeername(m_iSocket, addr, namelen, ec);
 }
 
 int CChannel::sendto(const sockaddr* addr, CPacket& packet) const
@@ -242,23 +243,14 @@ int CChannel::sendto(const sockaddr* addr, CPacket& packet) const
       ++ p;
    }
 
-   #ifndef WINDOWS
-      msghdr mh;
-      mh.msg_name = (sockaddr*)addr;
-      mh.msg_namelen = m_iSockAddrSize;
-      mh.msg_iov = (iovec*)packet.m_PacketVector;
-      mh.msg_iovlen = 2;
-      mh.msg_control = NULL;
-      mh.msg_controllen = 0;
-      mh.msg_flags = 0;
-
-      int res = ::sendmsg(m_iSocket, &mh, 0);
-   #else
-      DWORD size = CPacket::m_iPktHdrSize + packet.getLength();
-      int addrsize = m_iSockAddrSize;
-      int res = ::WSASendTo(m_iSocket, (LPWSABUF)packet.m_PacketVector, 2, &size, 0, addr, addrsize, NULL, NULL);
-      res = (0 == res) ? size : -1;
-   #endif
+   int res = 0;
+   {
+      std::error_code ec;
+      const int addrsize = m_iSockAddrSize;
+      const int total = CPacket::m_iPktHdrSize + packet.getLength();
+      res = udt::plat::UdpSocket::send_vectored(m_iSocket, addr, addrsize, (void*)packet.m_PacketVector, 2, total, ec);
+      if (res < 0) res = -1;
+   }
 
    // convert back into local host order
    //for (int k = 0; k < 4; ++ k)
@@ -281,35 +273,13 @@ int CChannel::sendto(const sockaddr* addr, CPacket& packet) const
 
 int CChannel::recvfrom(sockaddr* addr, CPacket& packet) const
 {
-   #ifndef WINDOWS
-      msghdr mh;
-      mh.msg_name = addr;
-      mh.msg_namelen = m_iSockAddrSize;
-      mh.msg_iov = packet.m_PacketVector;
-      mh.msg_iovlen = 2;
-      mh.msg_control = NULL;
-      mh.msg_controllen = 0;
-      mh.msg_flags = 0;
-
-      #ifdef UNIX
-         fd_set set;
-         timeval tv;
-         FD_ZERO(&set);
-         FD_SET(m_iSocket, &set);
-         tv.tv_sec = 0;
-         tv.tv_usec = 10000;
-         ::select(m_iSocket+1, &set, NULL, &set, &tv);
-      #endif
-
-      int res = ::recvmsg(m_iSocket, &mh, 0);
-   #else
-      DWORD size = CPacket::m_iPktHdrSize + packet.getLength();
-      DWORD flag = 0;
+   int res = 0;
+   {
+      std::error_code ec;
       int addrsize = m_iSockAddrSize;
-
-      int res = ::WSARecvFrom(m_iSocket, (LPWSABUF)packet.m_PacketVector, 2, &size, &flag, addr, &addrsize, NULL, NULL);
-      res = (0 == res) ? size : -1;
-   #endif
+      res = udt::plat::UdpSocket::recv_vectored(m_iSocket, addr, addrsize, (void*)packet.m_PacketVector, 2, CPacket::m_iPktHdrSize + packet.getLength(), ec);
+      if (res < 0) res = -1;
+   }
 
    if (res <= 0)
    {
