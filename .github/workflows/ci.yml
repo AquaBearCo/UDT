@@ -32,11 +32,11 @@ jobs:
       - name: Build aarch64
         run: |
           cmake --preset linux-aarch64-release
-          cmake --build --preset build-linux-aarch64
+          cmake --build --preset build-linux-aarch64-release
       - name: Build armv7hf
         run: |
           cmake --preset linux-armv7hf-release
-          cmake --build --preset build-linux-armv7hf
+          cmake --build --preset build-linux-armv7hf-release
 
   windows:
     runs-on: windows-latest
@@ -51,4 +51,3 @@ jobs:
           PRESET: ${{ matrix.preset }}
       - name: Build
         run: cmake --build --preset build-${{ matrix.preset }}
-

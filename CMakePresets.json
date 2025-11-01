@@ -123,8 +123,18 @@
     { "name": "build-linux-armv7hf-debug", "configurePreset": "linux-armv7hf-debug" },
     { "name": "build-win-x64", "configurePreset": "win-x64-release" },
     { "name": "build-win-x64-debug", "configurePreset": "win-x64-debug" },
-    { "name": "build-win-arm64", "configurePreset": "win-arm64-release" }
-    ,{ "name": "build-macos-arm64", "configurePreset": "macos-arm64-release" }
-    ,{ "name": "build-macos-arm64-debug", "configurePreset": "macos-arm64-debug" }
+    { "name": "build-win-arm64", "configurePreset": "win-arm64-release" },
+    { "name": "build-macos-arm64", "configurePreset": "macos-arm64-release" },
+    { "name": "build-macos-arm64-debug", "configurePreset": "macos-arm64-debug" },
+    
+    // Aliases to match build-${configurePreset} naming for CI/scripts
+    { "name": "build-linux-x64-release", "configurePreset": "linux-x64-release" },
+    { "name": "build-linux-aarch64-release", "configurePreset": "linux-aarch64-release" },
+    { "name": "build-linux-aarch64-debug", "configurePreset": "linux-aarch64-debug" },
+    { "name": "build-linux-armv7hf-release", "configurePreset": "linux-armv7hf-release" },
+    { "name": "build-linux-armv7hf-debug", "configurePreset": "linux-armv7hf-debug" },
+    { "name": "build-win-x64-release", "configurePreset": "win-x64-release" },
+    { "name": "build-win-arm64-release", "configurePreset": "win-arm64-release" },
+    { "name": "build-macos-arm64-release", "configurePreset": "macos-arm64-release" }
   ]
 }
