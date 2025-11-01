@@ -155,6 +155,27 @@ int UdpSocket::set_pmtud(UDPSOCKET fd, bool enable, std::error_code& ec) noexcep
   return ok;
 }
 
+int UdpSocket::set_ecn(UDPSOCKET fd, int ecn, std::error_code& ec) noexcept {
+  if (ecn < 0) ecn = 0; if (ecn > 3) ecn = 3;
+  int ok = 0; int tos = 0;
+#ifdef IP_TOS
+  socklen_t sz = sizeof(tos);
+  if (::getsockopt(static_cast<int>(fd), IPPROTO_IP, IP_TOS, &tos, &sz) == 0) {
+    tos = (tos & ~0x3) | (ecn & 0x3);
+    if (::setsockopt(static_cast<int>(fd), IPPROTO_IP, IP_TOS, &tos, sizeof(tos)) != 0) { ok = -1; ec = std::error_code(errno, std::generic_category()); }
+  }
+#endif
+#ifdef IPV6_TCLASS
+  int tclass = 0; socklen_t sz6 = sizeof(tclass);
+  if (::getsockopt(static_cast<int>(fd), IPPROTO_IPV6, IPV6_TCLASS, &tclass, &sz6) == 0) {
+    tclass = (tclass & ~0x3) | (ecn & 0x3);
+    if (::setsockopt(static_cast<int>(fd), IPPROTO_IPV6, IPV6_TCLASS, &tclass, sizeof(tclass)) != 0) { if (ok == 0) { ok = -1; ec = std::error_code(errno, std::generic_category()); } else {/* keep first error */} }
+    else { ok = 0; }
+  }
+#endif
+  return ok;
+}
+
 }} // namespace
 
 #endif

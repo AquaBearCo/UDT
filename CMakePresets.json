@@ -12,6 +12,16 @@
       }
     },
     {
+      "name": "linux-x64-release-lto",
+      "displayName": "Linux x86_64 Release LTO",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/linux-x64-release-lto",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_INTERPROCEDURAL_OPTIMIZATION": "ON"
+      }
+    },
+    {
       "name": "macos-arm64-release",
       "displayName": "macOS arm64 Release",
       "generator": "Ninja",
@@ -116,7 +126,9 @@
   ],
   "buildPresets": [
     { "name": "build-linux-x64", "configurePreset": "linux-x64-release" },
+    { "name": "build-linux-x64-release", "configurePreset": "linux-x64-release" },
     { "name": "build-linux-x64-debug", "configurePreset": "linux-x64-debug" },
+    { "name": "build-linux-x64-release-lto", "configurePreset": "linux-x64-release-lto" },
     { "name": "build-linux-aarch64", "configurePreset": "linux-aarch64-release" },
     { "name": "build-linux-aarch64-debug", "configurePreset": "linux-aarch64-debug" },
     { "name": "build-linux-armv7hf", "configurePreset": "linux-armv7hf-release" },

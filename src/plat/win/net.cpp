@@ -106,6 +106,26 @@ int UdpSocket::set_pmtud(UDPSOCKET, bool, std::error_code&) noexcept {
   return 0;
 }
 
+int UdpSocket::set_ecn(UDPSOCKET fd, int ecn, std::error_code& ec) noexcept {
+  if (ecn < 0) ecn = 0; if (ecn > 3) ecn = 3;
+  int ok = 0; int tos = 0; int sz = sizeof(tos);
+#ifdef IP_TOS
+  if (::getsockopt(fd, IPPROTO_IP, IP_TOS, reinterpret_cast<char*>(&tos), &sz) == 0) {
+    tos = (tos & ~0x3) | (ecn & 0x3);
+    if (::setsockopt(fd, IPPROTO_IP, IP_TOS, reinterpret_cast<const char*>(&tos), sizeof(tos)) != 0) { ok = -1; ec = std::error_code(WSAGetLastError(), std::system_category()); }
+  }
+#endif
+#ifdef IPV6_TCLASS
+  int tclass = 0; int sz6 = sizeof(tclass);
+  if (::getsockopt(fd, IPPROTO_IPV6, IPV6_TCLASS, reinterpret_cast<char*>(&tclass), &sz6) == 0) {
+    tclass = (tclass & ~0x3) | (ecn & 0x3);
+    if (::setsockopt(fd, IPPROTO_IPV6, IPV6_TCLASS, reinterpret_cast<const char*>(&tclass), sizeof(tclass)) != 0) { if (ok == 0) { ok = -1; ec = std::error_code(WSAGetLastError(), std::system_category()); } }
+    else { ok = 0; }
+  }
+#endif
+  return ok;
+}
+
 }} // namespace
 
 #endif

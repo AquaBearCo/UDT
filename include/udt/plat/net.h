@@ -41,6 +41,8 @@ public:
   // Optional helpers (capability-checked internally). Return 0 on success or unsupported; -1 on hard error.
   // Sets DSCP value (0..63). Backend maps to IP_TOS/IPV6_TCLASS as available.
   static int set_dscp(UDPSOCKET fd, int dscp, std::error_code& ec) noexcept;
+  // Sets ECN bits (0..3, lower 2 bits of TOS/Traffic Class), preserving DSCP when possible.
+  static int set_ecn(UDPSOCKET fd, int ecn, std::error_code& ec) noexcept;
   // Enable/disable Path MTU Discovery when supported. Best-effort no-op on unsupported platforms.
   static int set_pmtud(UDPSOCKET fd, bool enable, std::error_code& ec) noexcept;
 };

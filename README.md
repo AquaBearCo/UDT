@@ -49,5 +49,41 @@ Note on terminology: Throughout this project, the acronym TLS refers to thread-l
  - Cleaned up source for cross-compile environment in linux
  - Cleaned up preprocessor symbols and removed deprecated
  - Strips unneeded symbols, drastically reducing size
- - Static linking to mingw libraries for windows build
+- Static linking to mingw libraries for windows build
+
+## Modernized Build & Packaging (This Fork)
+
+- CMake 3.16+ with target-based configuration (C++17).
+- Cross-platform presets for Linux, Windows, macOS; shared and static libs.
+- Internal portability layer (UDP sockets and synchronization) with platform backends.
+- CI includes Linux sanitizers; macOS and Windows builds covered.
+- pkg-config file `udt.pc` installed alongside CMake package exports.
+
+### Build Quickstart
+
+- Configure + build using presets, examples:
+  - Linux x64 Release: `cmake --preset linux-x64-release && cmake --build --preset build-linux-x64-release -j`
+  - Linux x64 Debug: `cmake --preset linux-x64-debug && cmake --build --preset build-linux-x64-debug -j`
+  - Windows x64 (MSVC): `cmake --preset win-x64-release && cmake --build --preset build-win-x64`
+  - macOS arm64: `cmake --preset macos-arm64-release && cmake --build --preset build-macos-arm64`
+- Install: `cmake --install build/<preset-dir> --prefix <dest>`
+
+### Options
+
+- `UDT_ENABLE_POLLER` (default ON): build internal Poller abstraction
+  - Linux: epoll backend; macOS/BSD: kqueue backend; Windows: stub (IOCP planned)
+- `UDT_ENABLE_DOXYGEN` (default OFF): adds `udt-doc` target if Doxygen is found
+
+### pkg-config
+
+The build installs a pkg-config file `udt.pc` for consumers:
+
+```
+pkg-config --cflags udt
+pkg-config --libs udt
+```
+
+### Notes
+
+- TLS in this repository refers to thread-local storage (internal), not Transport Layer Security.
 
