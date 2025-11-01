@@ -1,6 +1,6 @@
-# Breaking the Data Transfer Bottleneck
+# UXDT: Modernized UDT — Breaking the Data Transfer Bottleneck
 
-UDT is a reliable UDP based application level data transport protocol for distributed data intensive applications
+UDT (protocol) is a reliable UDP based application level data transport protocol for distributed data intensive applications
  over wide area high-speed networks. UDT uses UDP to transfer bulk data with its own reliability control and 
  congestion control mechanisms. The new protocol can transfer data at a much higher speed than TCP does. UDT
   is also a highly configurable framework that can accommodate various congestion control algorithms.  
@@ -16,7 +16,8 @@ UDT is [fast](http://barchart.github.com/barchart-udt/main/presentation-2009/img
 
 UDT is developed by [Yunhong Gu](http://www.linkedin.com/in/yunhong) and others at University of Illinois and Google.
 
-UDT C++ implementation is available under [BSD license](http://udt.sourceforge.net/license.html)
+The original UDT C++ implementation is available under [BSD license](http://udt.sourceforge.net/license.html).
+This fork (UXDT) modernizes build, portability, and packaging while retaining the same public API (src/udt.h).
 
 Note on terminology: Throughout this project, the acronym TLS refers to thread-local storage (per-thread data), not Transport Layer Security. Any references to "TLS keys" are about thread-local error storage used internally by the UDT library.
 
@@ -51,13 +52,13 @@ Note on terminology: Throughout this project, the acronym TLS refers to thread-l
  - Strips unneeded symbols, drastically reducing size
 - Static linking to mingw libraries for windows build
 
-## Modernized Build & Packaging (This Fork)
+## Modernized Build & Packaging (UXDT Fork)
 
 - CMake 3.16+ with target-based configuration (C++17).
 - Cross-platform presets for Linux, Windows, macOS; shared and static libs.
 - Internal portability layer (UDP sockets and synchronization) with platform backends.
 - CI includes Linux sanitizers; macOS and Windows builds covered.
-- pkg-config file `udt.pc` installed alongside CMake package exports.
+- pkg-config files `udt.pc` and `uxdt.pc` installed alongside CMake package exports.
 
 ### Build Quickstart
 
@@ -76,7 +77,7 @@ Note on terminology: Throughout this project, the acronym TLS refers to thread-l
 
 ### pkg-config
 
-The build installs a pkg-config file `udt.pc` for consumers:
+The build installs pkg-config files `udt.pc` and `uxdt.pc` for consumers:
 
 ```
 pkg-config --cflags udt
@@ -86,4 +87,5 @@ pkg-config --libs udt
 ### Notes
 
 - TLS in this repository refers to thread-local storage (internal), not Transport Layer Security.
+- CMake find_package supports both `udt` and `uxdt`; targets `udt::udt`, `udt::udt_static` (and UXDT aliases) are provided.
 

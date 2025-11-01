@@ -93,6 +93,8 @@ if(UDT_BUILD_SHARED)
   set_target_properties(udt PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
   udt_apply_linkage(udt)
   add_library(udt::udt ALIAS udt)
+  # Build-time UXDT alias namespace (not exported)
+  add_library(uxdt::udt ALIAS udt)
 endif()
 
 if(UDT_BUILD_STATIC)
@@ -100,6 +102,8 @@ if(UDT_BUILD_STATIC)
   set_target_properties(udt_static PROPERTIES OUTPUT_NAME udt)
   udt_apply_linkage(udt_static)
   add_library(udt::udt_static ALIAS udt_static)
+  # Build-time UXDT alias namespace (not exported)
+  add_library(uxdt::udt_static ALIAS udt_static)
 endif()
 
 # Warn when building deprecated Win32 (32-bit) target
@@ -111,6 +115,7 @@ endif()
 include(GNUInstallDirs)
 
 set(UDT_INSTALL_CONFIGDIR "${CMAKE_INSTALL_LIBDIR}/cmake/udt")
+set(UXDT_INSTALL_CONFIGDIR "${CMAKE_INSTALL_LIBDIR}/cmake/uxdt")
 
 set(_udt_install_targets)
 if(TARGET udt)
@@ -152,9 +157,22 @@ write_basic_package_version_file(
   COMPATIBILITY SameMajorVersion
 )
 
+# Also provide a UXDT package config/version that aliases to udt targets
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/uxdtConfigVersion.cmake"
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY SameMajorVersion
+)
+
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/cmake/udtConfig.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/udtConfig.cmake
+  @ONLY
+)
+
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/uxdtConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/uxdtConfig.cmake
   @ONLY
 )
 
@@ -162,6 +180,12 @@ install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/udtConfig.cmake"
   "${CMAKE_CURRENT_BINARY_DIR}/udtConfigVersion.cmake"
   DESTINATION ${UDT_INSTALL_CONFIGDIR}
+)
+
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/uxdtConfig.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/uxdtConfigVersion.cmake"
+  DESTINATION ${UXDT_INSTALL_CONFIGDIR}
 )
 
 # pkg-config file
@@ -173,6 +197,17 @@ configure_file(
 
 install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/udt.pc"
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+)
+
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/uxdt.pc.in
+  ${CMAKE_CURRENT_BINARY_DIR}/uxdt.pc
+  @ONLY
+)
+
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/uxdt.pc"
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
 )
 

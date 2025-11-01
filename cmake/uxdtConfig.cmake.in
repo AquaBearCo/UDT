@@ -1,0 +1,17 @@
+@PACKAGE_INIT@
+
+# Reuse the udt exported targets
+include("${CMAKE_CURRENT_LIST_DIR}/udt-targets.cmake")
+
+# Provide UXDT namespace aliases as imported interface targets
+if(NOT TARGET uxdt::udt AND TARGET udt)
+  add_library(uxdt::udt INTERFACE IMPORTED)
+  set_target_properties(uxdt::udt PROPERTIES INTERFACE_LINK_LIBRARIES udt)
+endif()
+if(NOT TARGET uxdt::udt_static AND TARGET udt_static)
+  add_library(uxdt::udt_static INTERFACE IMPORTED)
+  set_target_properties(uxdt::udt_static PROPERTIES INTERFACE_LINK_LIBRARIES udt_static)
+endif()
+
+check_required_components(uxdt)
+
