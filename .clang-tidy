@@ -1,0 +1,5 @@
+Checks: '-*,modernize-*,readability-*,bugprone-*,performance-*'
+WarningsAsErrors: false
+HeaderFilterRegex: '^(src|include)/'
+AnalyzeTemporaryDtors: false
+FormatStyle: none

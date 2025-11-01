@@ -89,6 +89,8 @@ endfunction()
 if(UDT_BUILD_SHARED)
   add_library(udt SHARED $<TARGET_OBJECTS:udt_objs>)
   target_link_libraries(udt PRIVATE)
+  # Set VERSION/SOVERSION for proper SONAME and symlinks on ELF platforms
+  set_target_properties(udt PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
   udt_apply_linkage(udt)
   add_library(udt::udt ALIAS udt)
 endif()
@@ -173,3 +175,19 @@ install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/udt.pc"
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
 )
+
+# Optional Doxygen documentation for public API (off by default)
+option(UDT_ENABLE_DOXYGEN "Enable building Doxygen docs" OFF)
+if(UDT_ENABLE_DOXYGEN)
+  find_package(Doxygen QUIET)
+  if(DOXYGEN_FOUND)
+    set(UDT_DOXY_INPUT "${CMAKE_CURRENT_SOURCE_DIR}/src/udt.h")
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+    add_custom_target(udt-doc
+      COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+      COMMENT "Generating UDT API documentation with Doxygen" VERBATIM)
+  else()
+    message(STATUS "Doxygen not found. Set UDT_ENABLE_DOXYGEN=OFF or install Doxygen.")
+  endif()
+endif()

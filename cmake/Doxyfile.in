@@ -1,0 +1,15 @@
+# Minimal Doxygen configuration for UDT public API
+PROJECT_NAME           = "udt"
+PROJECT_NUMBER         = "@PROJECT_VERSION@"
+OUTPUT_DIRECTORY       = "@CMAKE_CURRENT_BINARY_DIR@/docs"
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+QUIET                  = YES
+WARN_IF_UNDOCUMENTED   = NO
+INPUT                  = "@UDT_DOXY_INPUT@"
+FILE_PATTERNS          = *.h
+RECURSIVE              = NO
+EXTRACT_ALL            = NO
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = NO
+HAVE_DOT               = NO

@@ -80,3 +80,23 @@ jobs:
         run: cmake --preset linux-x64-debug
       - name: Build (Debug + ASan/UBSan)
         run: cmake --build --preset build-linux-x64-debug -j
+
+  clang-tidy:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install clang-tidy and ninja
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-tidy ninja-build
+      - name: Configure (export compile commands)
+        run: cmake --preset linux-x64-debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      - name: Run clang-tidy on sources
+        run: |
+          SRC_LIST=$(find src -name "*.cpp")
+          if [ -z "$SRC_LIST" ]; then exit 0; fi
+          for f in $SRC_LIST; do
+            echo "Running clang-tidy on $f"
+            clang-tidy -p build/linux-x64-debug "$f" || true
+          done
