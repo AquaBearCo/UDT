@@ -52,6 +52,20 @@ jobs:
       - name: Build
         run: cmake --build --preset build-${{ matrix.preset }}
 
+  macos:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        preset: [macos-arm64-release]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ninja
+        run: brew install ninja || true
+      - name: Configure
+        run: cmake --preset ${{ matrix.preset }}
+      - name: Build
+        run: cmake --build --preset build-${{ matrix.preset }}
+
   linux-asan:
     runs-on: ubuntu-latest
     steps:
