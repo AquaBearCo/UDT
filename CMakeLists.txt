@@ -150,3 +150,15 @@ install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/udtConfigVersion.cmake"
   DESTINATION ${UDT_INSTALL_CONFIGDIR}
 )
+
+# pkg-config file
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/udt.pc.in
+  ${CMAKE_CURRENT_BINARY_DIR}/udt.pc
+  @ONLY
+)
+
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/udt.pc"
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+)

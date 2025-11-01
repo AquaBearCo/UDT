@@ -51,3 +51,18 @@ jobs:
           PRESET: ${{ matrix.preset }}
       - name: Build
         run: cmake --build --preset build-${{ matrix.preset }}
+
+  linux-asan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ninja
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+      - name: Configure (Debug with sanitizers)
+        env:
+          CFLAGS: "-fsanitize=address,undefined -fno-omit-frame-pointer"
+          CXXFLAGS: "-fsanitize=address,undefined -fno-omit-frame-pointer"
+          LDFLAGS: "-fsanitize=address,undefined"
+        run: cmake --preset linux-x64-debug
+      - name: Build (Debug + ASan/UBSan)
+        run: cmake --build --preset build-linux-x64-debug -j
