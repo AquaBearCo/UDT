@@ -27,12 +27,20 @@ set(SOURCES
   src/plat/win/sync.cpp
   src/plat/posix/net.cpp
   src/plat/win/net.cpp
-  src/plat/posix/poller_epoll.cpp
 )
 
 # Build options
 option(UDT_BUILD_SHARED "Build shared library" ON)
 option(UDT_BUILD_STATIC "Build static library" ON)
+option(UDT_ENABLE_POLLER "Enable internal Poller abstraction" ON)
+
+if(UDT_ENABLE_POLLER)
+  if(WIN32)
+    list(APPEND SOURCES src/plat/win/poller_stub.cpp)
+  else()
+    list(APPEND SOURCES src/plat/posix/poller_epoll.cpp)
+  endif()
+endif()
 
 # Common object library to avoid dual compilation definitions drift
 add_library(udt_objs OBJECT ${SOURCES})
