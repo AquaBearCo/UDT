@@ -37,6 +37,12 @@ public:
   // Vectored UDP send/recv. vec points to platform iovec/WSABUF array.
   static int send_vectored(UDPSOCKET fd, const sockaddr* sa, int namelen, void* vec, int veclen, int total_len, std::error_code& ec) noexcept;
   static int recv_vectored(UDPSOCKET fd, sockaddr* sa, int& namelen, void* vec, int veclen, int buf_total, std::error_code& ec) noexcept;
+
+  // Optional helpers (capability-checked internally). Return 0 on success or unsupported; -1 on hard error.
+  // Sets DSCP value (0..63). Backend maps to IP_TOS/IPV6_TCLASS as available.
+  static int set_dscp(UDPSOCKET fd, int dscp, std::error_code& ec) noexcept;
+  // Enable/disable Path MTU Discovery when supported. Best-effort no-op on unsupported platforms.
+  static int set_pmtud(UDPSOCKET fd, bool enable, std::error_code& ec) noexcept;
 };
 
 }} // namespace udt::plat

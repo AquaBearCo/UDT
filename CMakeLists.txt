@@ -27,6 +27,7 @@ set(SOURCES
   src/plat/win/sync.cpp
   src/plat/posix/net.cpp
   src/plat/win/net.cpp
+  src/plat/posix/poller_epoll.cpp
 )
 
 # Build options

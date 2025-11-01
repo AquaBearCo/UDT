@@ -82,6 +82,30 @@ int UdpSocket::recv_vectored(UDPSOCKET fd, sockaddr* sa, int& namelen, void* vec
   namelen = nl; (void)buf_total; return static_cast<int>(recvd);
 }
 
+int UdpSocket::set_dscp(UDPSOCKET fd, int dscp, std::error_code& ec) noexcept {
+  if (dscp < 0) dscp = 0; if (dscp > 63) dscp = 63;
+  int tos = dscp << 2;
+  int ok = 0;
+#ifdef IP_TOS
+  if (setsockopt(fd, IPPROTO_IP, IP_TOS, reinterpret_cast<const char*>(&tos), sizeof(tos)) != 0) {
+    ok = -1; ec = std::error_code(WSAGetLastError(), std::system_category());
+  }
+#endif
+#ifdef IPV6_TCLASS
+  if (setsockopt(fd, IPPROTO_IPV6, IPV6_TCLASS, reinterpret_cast<const char*>(&tos), sizeof(tos)) != 0) {
+    if (ok == 0) { ok = -1; ec = std::error_code(WSAGetLastError(), std::system_category()); }
+  } else {
+    ok = 0;
+  }
+#endif
+  return ok;
+}
+
+int UdpSocket::set_pmtud(UDPSOCKET, bool, std::error_code&) noexcept {
+  // No-op on Windows for now; IOCTL/SIO_ options exist but vary by version.
+  return 0;
+}
+
 }} // namespace
 
 #endif

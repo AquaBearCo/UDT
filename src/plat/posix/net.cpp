@@ -113,6 +113,48 @@ int UdpSocket::recv_vectored(UDPSOCKET fd, sockaddr* sa, int& namelen, void* vec
   return res;
 }
 
+int UdpSocket::set_dscp(UDPSOCKET fd, int dscp, std::error_code& ec) noexcept {
+  (void)ec;
+  if (dscp < 0) dscp = 0; if (dscp > 63) dscp = 63;
+  int tos = dscp << 2; // DSCP is upper 6 bits of TOS/Traffic Class
+  int ok = 0;
+#ifdef IP_TOS
+  if (::setsockopt(static_cast<int>(fd), IPPROTO_IP, IP_TOS, &tos, sizeof(tos)) != 0) {
+    // keep error, but try IPv6 class as well
+    ok = -1; ec = std::error_code(errno, std::generic_category());
+  }
+#endif
+#ifdef IPV6_TCLASS
+  if (::setsockopt(static_cast<int>(fd), IPPROTO_IPV6, IPV6_TCLASS, &tos, sizeof(tos)) != 0) {
+    if (ok == 0) { ok = -1; ec = std::error_code(errno, std::generic_category()); }
+  } else {
+    ok = 0; // success on v6 path overrides
+  }
+#endif
+  // If neither option exists, treat as no-op success
+  return ok;
+}
+
+int UdpSocket::set_pmtud(UDPSOCKET fd, bool enable, std::error_code& ec) noexcept {
+  (void)ec;
+  int ok = 0;
+#ifdef IP_MTU_DISCOVER
+  int v = enable ? IP_PMTUDISC_DO : IP_PMTUDISC_DONT;
+  if (::setsockopt(static_cast<int>(fd), IPPROTO_IP, IP_MTU_DISCOVER, &v, sizeof(v)) != 0) {
+    ok = -1; ec = std::error_code(errno, std::generic_category());
+  }
+#endif
+#ifdef IPV6_MTU_DISCOVER
+  int vv = enable ? IPV6_PMTUDISC_DO : IPV6_PMTUDISC_DONT;
+  if (::setsockopt(static_cast<int>(fd), IPPROTO_IPV6, IPV6_MTU_DISCOVER, &vv, sizeof(vv)) != 0) {
+    if (ok == 0) { ok = -1; ec = std::error_code(errno, std::generic_category()); }
+  } else {
+    ok = 0;
+  }
+#endif
+  return ok;
+}
+
 }} // namespace
 
 #endif
